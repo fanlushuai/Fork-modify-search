@@ -1,0 +1,7 @@
+seimi:
+  crawler:
+    enabled: true
+    names:
+      -
+server:
+  port: 1112
