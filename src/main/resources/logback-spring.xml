@@ -32,6 +32,8 @@
 
     <logger name="name.auh" level="INFO"/>
 
+    <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="DEBUG"/>
+
     <root level="INFO">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
