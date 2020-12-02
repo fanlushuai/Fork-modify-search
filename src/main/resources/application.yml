@@ -1,4 +1,4 @@
 seimi:
   crawler:
     enabled: true
-    names: ForkList,ForkRepo
+    names: ForkList,ForkRepo,ForkRepoCommitLog
