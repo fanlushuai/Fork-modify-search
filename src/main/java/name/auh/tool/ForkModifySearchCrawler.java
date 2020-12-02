@@ -74,8 +74,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
             }
 
         } catch (NullPointerException e) {
-            log.error("-------->{}", jxDocument.toString());
-
+            log.error("-------->{}", response.getContent());
         }
 
     }
