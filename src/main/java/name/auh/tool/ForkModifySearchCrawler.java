@@ -24,9 +24,9 @@ import static name.auh.tool.PushNewCrawlerFromLastResultRepeater.FORK_REPO_RESUL
 public class ForkModifySearchCrawler extends BaseCrawler {
 
     /**
-     *  填入你的目标项目  格式： githubUserName/projectName
+     * 填入你的目标项目  格式： githubUserName/projectName
      */
-    private final static String TARGET_REPO = "tychxn/jd-assistant";
+    private final static String TARGET_REPO = "xingePush/xinge-api-java";
 
     @Override
     public String[] startUrls() {
@@ -47,9 +47,9 @@ public class ForkModifySearchCrawler extends BaseCrawler {
         forkListRepo.remove(0);
 
         forkListRepo.forEach(forkRepo -> {
-            log.info("forkRepo--- {}", forkRepo);
+            log.warn("forkRepo--- {}", forkRepo);
 
-            Request request = Request.build(String.format("https://github.com%s",forkRepo) , "parseForkRepo");
+            Request request = Request.build(String.format("https://github.com%s", forkRepo), "parseForkRepo");
             Map<String, Object> meta = new HashMap<>();
             meta.put("forkRepo", forkRepo);
             request.setMeta(meta);
@@ -66,7 +66,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
         try {
 
             String forkRepoState = jxDocument.selNOne("//div[@class='d-flex flex-auto']//text()").asString();
-            log.info("forkRepoState--- {}", forkRepoState);
+            log.warn("forkRepoState--- {}", forkRepoState);
 
             if (StringUtils.isEmpty(forkRepoState)) {
                 return;
@@ -75,14 +75,14 @@ public class ForkModifySearchCrawler extends BaseCrawler {
             Matcher matcher = COMMIT_AHEAD_NUMBER_PATTERN.matcher(forkRepoState);
             if (matcher.find()) {
                 Integer commitAheadNumber = Integer.valueOf(matcher.group(1));
-                log.info("commit ahead number---{} forkRepo --> {}", commitAheadNumber, response.getUrl());
+                log.warn("commit ahead number---{} forkRepo --> {}", commitAheadNumber, response.getUrl());
 
                 Map<String, Object> meta = new HashMap<>();
                 meta.put("commitAheadNumber", commitAheadNumber);
 
                 String forkRepo = (String) Util.getMate(response).get("forkRepo");
 
-                Request request=Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
+                Request request = Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
                         "parseForkRepoCommitLog", HttpMethod.GET, null, meta);
                 FORK_REPO_RESULT.add(request);
             }
@@ -111,7 +111,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
             String commitLog = commitLogs.get(i).asString().trim();
             String commitLogHash = commitLogs.get(i + 5).asString().trim();
             //commitLogHash 存在情况 ep. Update README.md fanlushuai committed May 27, 2019  commitLogHash-->Verified This commit was created on GitHub.com and signed with a verified signature using GitHub’s key. GPG key ID:
-            log.error("commitLog--->{}  commitLogHash-->{}", commitLog, commitLogHash);
+            log.warn("modifyLog [{}]-> {}  logHash-->{}", response.getUrl(), commitLog, commitLogHash.substring(0, commitLogHash.length() > 6 ? 6 : commitLogHash.length()));
         }
 
     }
