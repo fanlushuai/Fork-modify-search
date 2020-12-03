@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static name.auh.tool.PushNewCrawlerFromLastResultRepeater.FORK_LIST_RESULT;
+import static name.auh.tool.PushNewCrawlerFromLastResultRepeater.FORK_REPO_RESULT;
+
 @Crawler(name = "ForkModifySearch", httpType = SeimiHttpType.OK_HTTP3, useUnrepeated = false, delay = 2, useCookie = false)
 @Slf4j
 public class ForkModifySearchCrawler extends BaseCrawler {
@@ -43,13 +46,15 @@ public class ForkModifySearchCrawler extends BaseCrawler {
         //移除第一个选取，这个是fork源的名称
         forkListRepo.remove(0);
 
-        forkListRepo.forEach(v -> {
-            log.info("forkRepo--- {}", v);
-            Request request = Request.build("https://github.com" + v, "parseForkRepo");
+        forkListRepo.forEach(forkRepo -> {
+            log.info("forkRepo--- {}", forkRepo);
+
+            Request request = Request.build(String.format("https://github.com%s",forkRepo) , "parseForkRepo");
             Map<String, Object> meta = new HashMap<>();
-            meta.put("forkRepo", v);
+            meta.put("forkRepo", forkRepo);
             request.setMeta(meta);
-            push(request);
+
+            FORK_LIST_RESULT.add(request);
         });
     }
 
@@ -77,7 +82,9 @@ public class ForkModifySearchCrawler extends BaseCrawler {
 
                 String forkRepo = (String) Util.getMate(response).get("forkRepo");
 
-                push(Request.build(String.format("https://github.com/%s/commits/master", forkRepo), "parseForkRepoCommitLog", HttpMethod.GET, null, meta));
+                Request request=Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
+                        "parseForkRepoCommitLog", HttpMethod.GET, null, meta);
+                FORK_REPO_RESULT.add(request);
             }
 
         } catch (NullPointerException e) {
