@@ -19,18 +19,18 @@ import java.util.regex.Pattern;
 import static name.auh.tool.PushNewCrawlerFromLastResultRepeater.FORK_LIST_RESULT;
 import static name.auh.tool.PushNewCrawlerFromLastResultRepeater.FORK_REPO_RESULT;
 
-@Crawler(name = "ForkModifySearch", httpType = SeimiHttpType.OK_HTTP3, useUnrepeated = false, delay = 2, useCookie = false)
+@Crawler(name = "ForkModifySearch", httpType = SeimiHttpType.OK_HTTP3, useUnrepeated = false, delay = 1, useCookie = false)
 @Slf4j
 public class ForkModifySearchCrawler extends BaseCrawler {
 
     /**
      *  填入你的目标项目  格式： githubUserName/projectName
      */
-    private final static String targetRepo = "tychxn/jd-assistant";
+    private final static String TARGET_REPO = "tychxn/jd-assistant";
 
     @Override
     public String[] startUrls() {
-        String targetRepoUrl = String.format("https://github.com/%s/network/members", targetRepo);
+        String targetRepoUrl = String.format("https://github.com/%s/network/members", TARGET_REPO);
         return new String[]{targetRepoUrl};
     }
 
@@ -58,7 +58,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
         });
     }
 
-    private static final Pattern commitAheadNumberPattern = Pattern.compile("^*(\\d+) commits ahead*");
+    private static final Pattern COMMIT_AHEAD_NUMBER_PATTERN = Pattern.compile("^*(\\d+) commits ahead*");
 
     public void parseForkRepo(Response response) {
         JXDocument jxDocument = response.document();
@@ -72,7 +72,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
                 return;
             }
 
-            Matcher matcher = commitAheadNumberPattern.matcher(forkRepoState);
+            Matcher matcher = COMMIT_AHEAD_NUMBER_PATTERN.matcher(forkRepoState);
             if (matcher.find()) {
                 Integer commitAheadNumber = Integer.valueOf(matcher.group(1));
                 log.info("commit ahead number---{} forkRepo --> {}", commitAheadNumber, response.getUrl());
