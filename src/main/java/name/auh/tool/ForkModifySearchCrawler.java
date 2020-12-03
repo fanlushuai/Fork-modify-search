@@ -26,7 +26,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
     /**
      * 填入你的目标项目  格式： githubUserName/projectName
      */
-    private final static String TARGET_REPO = "xingePush/xinge-api-java";
+    private final static String TARGET_REPO = "tychxn/jd-assistant";
 
     @Override
     public String[] startUrls() {
@@ -88,7 +88,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
             }
 
         } catch (NullPointerException e) {
-            log.error("-------->{}", response.getContent());
+            log.error("requestUrl--> {} -------->{}", response.getUrl(),response.getContent().contains("Rate limit")?"Rate limit":response.getContent());
         }
 
     }
