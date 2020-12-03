@@ -1,16 +1,12 @@
-## 分析请求，确定思路
+# Fork-modify-search
+github fork仓库对原始仓库修改未合并的查询。方便快速的找到小码哥fork某仓库之后做了修改并未合并到主仓库的变更。
+可以用来学习心仪项目在其他同道中人的手中做的改变。爱屋及乌，学习一下别人怎么搞的。
 
-## 请求分析
+## 实现思路
+获取某个仓库的fork 列表，遍历查找到每个fork仓库，查看每个仓库的状态情况。存在ahead commit的视为对原始仓库做了修改。
+并且获取到ahead commit的commit数量，到对应仓库的commit log页面抓取相应数量的commit log。自此完成发现小码哥的杰作以及小码哥的修改概览
 
-1. 获取对应仓库的fork列表
-https://github.com/zhegexiaohuozi/SeimiCrawler/network/members
-https://github.com/{bolong/repoName}/network/members
-
-2. 遍历fork的每个仓库地址，仓库地址首页的提交信息。找到最新更新的commit hash
-https://github.com/{forkUsername}/SeimiCrawler
-
-3. 验证最新的提交是否存在于被fork仓库
-https://github.com/zhegexiaohuozi/SeimiCrawler/commit/{commitId}
-
-4. 列出所有最新的提交日志。根据上个请求提示的数量。截取前面几个commit log
-https://github.com/fanlushuai/SeimiCrawler/commits/master
+## 状态
+基本逻辑功能都有了。可以顺利实现预期效果。存在的问题，容易被github ratelimit。可以暴力的调节请求间等待时间缓解
+但是不能根本上解决。主要原因在于使用的爬虫架子semi的小问题，未将线程数定义暴露出来。之前自己改过可定义线程数量的版本。但是当时使用了github作为maven托管，
+年久失修，不想再处理了。感兴趣的，可以搞个shell版本的出来。这样大家使用起来更加的happy。或者托管到自己的服务器上暴露http服务。也是很happy的。
