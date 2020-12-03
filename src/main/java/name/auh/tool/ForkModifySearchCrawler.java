@@ -20,7 +20,10 @@ import java.util.regex.Pattern;
 @Slf4j
 public class ForkModifySearchCrawler extends BaseCrawler {
 
-    private final static String targetRepo = "zhegexiaohuozi/SeimiCrawler";
+    /**
+     *  填入你的目标项目  格式： githubUserName/projectName
+     */
+    private final static String targetRepo = "tychxn/jd-assistant";
 
     @Override
     public String[] startUrls() {
@@ -36,6 +39,10 @@ public class ForkModifySearchCrawler extends BaseCrawler {
     public void parseForkList(Response response) {
         JXDocument jxDocument = response.document();
         List<Object> forkListRepo = jxDocument.sel("//div[@id='network']//div[@class='repo']/a[last()]/@href");
+
+        //移除第一个选取，这个是fork源的名称
+        forkListRepo.remove(0);
+
         forkListRepo.forEach(v -> {
             log.info("forkRepo--- {}", v);
             Request request = Request.build("https://github.com" + v, "parseForkRepo");
