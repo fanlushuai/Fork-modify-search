@@ -39,6 +39,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
         parseForkList(response);
     }
 
+    @RateLimitFinder
     public void parseForkList(Response response) {
         JXDocument jxDocument = response.document();
         List<Object> forkListRepo = jxDocument.sel("//div[@id='network']//div[@class='repo']/a[last()]/@href");
@@ -53,6 +54,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
             Map<String, Object> meta = new HashMap<>();
             meta.put("forkRepo", forkRepo);
             request.setMeta(meta);
+            request.setMaxReqCount(1);
 
             FORK_LIST_RESULT.add(request);
         });
@@ -60,39 +62,37 @@ public class ForkModifySearchCrawler extends BaseCrawler {
 
     private static final Pattern COMMIT_AHEAD_NUMBER_PATTERN = Pattern.compile("^*(\\d+) commits ahead*");
 
+    @RateLimitFinder
     public void parseForkRepo(Response response) {
         JXDocument jxDocument = response.document();
 
-        try {
+        String forkRepoState = jxDocument.selNOne("//div[@class='d-flex flex-auto']//text()").asString();
+        log.warn("forkRepoState--- {}", forkRepoState);
 
-            String forkRepoState = jxDocument.selNOne("//div[@class='d-flex flex-auto']//text()").asString();
-            log.warn("forkRepoState--- {}", forkRepoState);
-
-            if (StringUtils.isEmpty(forkRepoState)) {
-                return;
-            }
-
-            Matcher matcher = COMMIT_AHEAD_NUMBER_PATTERN.matcher(forkRepoState);
-            if (matcher.find()) {
-                Integer commitAheadNumber = Integer.valueOf(matcher.group(1));
-                log.warn("commit ahead number---{} forkRepo --> {}", commitAheadNumber, response.getUrl());
-
-                Map<String, Object> meta = new HashMap<>();
-                meta.put("commitAheadNumber", commitAheadNumber);
-
-                String forkRepo = (String) Util.getMate(response).get("forkRepo");
-
-                Request request = Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
-                        "parseForkRepoCommitLog", HttpMethod.GET, null, meta);
-                FORK_REPO_RESULT.add(request);
-            }
-
-        } catch (NullPointerException e) {
-            log.error("requestUrl--> {} -------->{}", response.getUrl(),response.getContent().contains("Rate limit")?"Rate limit":response.getContent());
+        if (StringUtils.isEmpty(forkRepoState)) {
+            return;
         }
+
+        Matcher matcher = COMMIT_AHEAD_NUMBER_PATTERN.matcher(forkRepoState);
+        if (matcher.find()) {
+            Integer commitAheadNumber = Integer.valueOf(matcher.group(1));
+            log.warn("commit ahead number---{} forkRepo --> {}", commitAheadNumber, response.getUrl());
+
+            Map<String, Object> meta = new HashMap<>();
+            meta.put("commitAheadNumber", commitAheadNumber);
+
+            String forkRepo = (String) Util.getMate(response).get("forkRepo");
+
+            Request request = Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
+                    "parseForkRepoCommitLog", HttpMethod.GET, null, meta);
+            request.setMaxReqCount(1);
+            FORK_REPO_RESULT.add(request);
+        }
+
 
     }
 
+    @RateLimitFinder
     public void parseForkRepoCommitLog(Response response) {
         JXDocument jxDocument = response.document();
         List<JXNode> commitLogs = jxDocument.selN("//ol/li//div//text()");

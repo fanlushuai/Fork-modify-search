@@ -23,14 +23,17 @@ public class PushNewCrawlerFromLastResultRepeater {
 
     final static ArrayBlockingQueue<Request> FORK_REPO_RESULT = new ArrayBlockingQueue(1314520);
 
-    private final static AtomicInteger REQUEST_COUNT =new AtomicInteger(0);
+    private final static AtomicInteger REQUEST_COUNT = new AtomicInteger(0);
 
     /**
      * 总体 抓取请求并发控制
-     * @throws IllegalAccessException
      */
-    @Scheduled(fixedDelay = 6000)
+    @Scheduled(fixedDelay = 5000)
     public void controlRequest() throws IllegalAccessException {
+
+        if (RateLimitInterceptor.isRateLimit()) {
+            return;
+        }
         /*
         1. 假设消费者消费能力很强，会出现瞬间并发oneTimeRequestCount的请求。所有要考虑到github瞬间的能力，来确定最大的oneTimeRequestCount
         2. 假设消费者消费能力不行，可能会导致上个周期产生的任务，积压到下个周期。导致某个周期出现超过oneTimeRequestCount的瞬间并发
@@ -38,32 +41,37 @@ public class PushNewCrawlerFromLastResultRepeater {
         3.  又因为，github可能设置一些频率限制规则。固定窗口，或者滑动窗口，或者一些自创的方式。要对fixedDelay和oneTimeRequuestCount进一步调整
         4. 总之慢慢调整吧，哈哈.奈何用了一个不开窍（有缺陷）的框架
          */
-        int oneTimeRequestCount = 20;
+        int oneTimeRequestCount = 50;
 
-        Field[] fields=PushNewCrawlerFromLastResultRepeater.class.getDeclaredFields();
+        Field[] fields = PushNewCrawlerFromLastResultRepeater.class.getDeclaredFields();
         for (Field field : fields) {
-           if(!field.getType().equals(ArrayBlockingQueue.class)){
-               continue;
-           }
+            if (!field.getType().equals(ArrayBlockingQueue.class)) {
+                continue;
+            }
             field.setAccessible(true);
-            ArrayBlockingQueue<Request> arrayBlockingQueue=(ArrayBlockingQueue<Request>)field.get(this);
-            oneTimeRequestCount=pushCrawlerFromLastResultRequestQueue(arrayBlockingQueue,oneTimeRequestCount,"ForkModifySearch");
-            if(oneTimeRequestCount==0){
+            ArrayBlockingQueue<Request> arrayBlockingQueue = (ArrayBlockingQueue<Request>) field.get(this);
+            oneTimeRequestCount = pushCrawlerFromLastResultRequestQueue(arrayBlockingQueue, oneTimeRequestCount, "ForkModifySearch");
+            if (oneTimeRequestCount == 0) {
                 return;
             }
         }
     }
 
     private int pushCrawlerFromLastResultRequestQueue(ArrayBlockingQueue<Request> lastResultRequestQueue, int oneTimePollCount, String crawlerName) {
-        int leftTimes= oneTimePollCount;
+        int leftTimes = oneTimePollCount;
         for (int i = 0; i < oneTimePollCount; i++) {
+
+            if (RateLimitInterceptor.isRateLimit()) {
+                continue;
+            }
+
             Request request = lastResultRequestQueue.poll();
             if (request == null) {
                 return leftTimes;
             }
             CrawlerCache.getCrawlerModel(crawlerName).sendRequest(request);
             log.debug("request Counter # {}", REQUEST_COUNT.incrementAndGet());
-            leftTimes-=1;
+            leftTimes -= 1;
         }
         return leftTimes;
     }
