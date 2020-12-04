@@ -30,6 +30,18 @@ public class RateLimitInterceptor implements SeimiInterceptor {
         return false;
     }
 
+    /**
+     * 魔法逻辑绕过 底层框架的问题(出错自动重试)会影响到我们自动检测的重新入队。导致重复数据
+     * 绕过的逻辑代码如下：
+     * cn/wanghaomiao/seimi/core/SeimiProcessor.java:90
+     * cn/wanghaomiao/seimi/core/SeimiProcessor.java:124
+     * cn/wanghaomiao/seimi/core/SeimiProcessor.java:128
+     */
+    static void magicHack(Request request) {
+        request.setCurrentReqCount(2);
+        request.setMaxReqCount(0);
+    }
+
     @Override
     public Class<? extends Annotation> getTargetAnnotationClass() {
         return null;
@@ -54,7 +66,9 @@ public class RateLimitInterceptor implements SeimiInterceptor {
             RATE_LIMIT_STOP.put(1, Boolean.TRUE.toString());
 
             log.warn("重新放回队列 {}", request.getUrl());
-            request.setCurrentReqCount(0);
+
+            RateLimitInterceptor.magicHack(request);
+
             if ("parseForkRepo".equals(request.getCallBack())) {
                 PushNewCrawlerFromLastResultRepeater.FORK_LIST_RESULT.add(request);
             } else if ("parseForkRepoCommitLog".equals(request.getCallBack())) {

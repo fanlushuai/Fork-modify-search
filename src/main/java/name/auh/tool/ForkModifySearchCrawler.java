@@ -26,7 +26,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
     /**
      * 填入你的目标项目  格式： githubUserName/projectName
      */
-    private final static String TARGET_REPO = "tychxn/jd-assistant";
+    private final static String TARGET_REPO = "pmb6tz/windows-desktop-switcher";
 
     @Override
     public String[] startUrls() {
@@ -54,7 +54,8 @@ public class ForkModifySearchCrawler extends BaseCrawler {
             Map<String, Object> meta = new HashMap<>();
             meta.put("forkRepo", forkRepo);
             request.setMeta(meta);
-            request.setMaxReqCount(1);
+
+            RateLimitInterceptor.magicHack(request);
 
             FORK_LIST_RESULT.add(request);
         });
@@ -85,7 +86,8 @@ public class ForkModifySearchCrawler extends BaseCrawler {
 
             Request request = Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
                     "parseForkRepoCommitLog", HttpMethod.GET, null, meta);
-            request.setMaxReqCount(1);
+            RateLimitInterceptor.magicHack(request);
+
             FORK_REPO_RESULT.add(request);
         }
 
