@@ -38,18 +38,18 @@ public class ForkRepoCommitLogCrawler extends BaseCrawler {
             return;
         }
 
-        Object commitAheadNumberObj=Util.getMate(response).get("commitAheadNumber");
-        if(commitAheadNumberObj==null){
+        Object commitAheadNumberObj = Util.getMate(response).get("commitAheadNumber");
+        if (commitAheadNumberObj == null) {
             return;
         }
         Integer commitAheadNumber = (Integer) commitAheadNumberObj;
-        for (int i = 0, oneCommitLength = 7, maxCommitLength = oneCommitLength* commitAheadNumber;
-             i < commitLogs.size() && i <maxCommitLength ;
-             i+=oneCommitLength) {
+        for (int i = 0, oneCommitLength = 7, maxCommitLength = oneCommitLength * commitAheadNumber;
+             i < commitLogs.size() && i < maxCommitLength;
+             i += oneCommitLength) {
             String commitLog = commitLogs.get(i).asString().trim();
-            String commitLogHash=commitLogs.get(i+5).asString().trim();
+            String commitLogHash = commitLogs.get(i + 5).asString().trim();
             //commitLogHash 存在情况 ep. Update README.md fanlushuai committed May 27, 2019  commitLogHash-->Verified This commit was created on GitHub.com and signed with a verified signature using GitHub’s key. GPG key ID:
-            log.info("commitLog--->{}  commitLogHash-->{}", commitLog,commitLogHash);
+            log.info("commitLog--->{}  commitLogHash-->{}", commitLog, commitLogHash);
         }
 
     }
