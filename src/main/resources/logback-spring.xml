@@ -39,7 +39,7 @@
             <fileNamePattern>${user.dir}/logs/result.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %-18([%thread]) %highlight(%-5level) %cyan(%-50(%logger)) -| %msg%n</pattern>
+            <pattern>%msg%n</pattern>
         </encoder>
     </appender>
 
@@ -60,6 +60,7 @@
     <!-- 有效结果通过warn日志输出-->
     <logger name="name.auh.tool.ForkModifySearchCrawler" level="WARN">
         <appender-ref ref="result"/>
+        <appender-ref ref="file"/>
     </logger>
 
     <root level="INFO">
