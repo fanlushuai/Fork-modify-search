@@ -12,7 +12,7 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %-18([%thread]) %.-1level|%-40.40logger{0}|%msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-18([%thread]) %highlight(%-5level) %cyan(%-50(%logger)) -| %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -26,7 +26,7 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %-18([%thread]) %.-1level|%-40.40logger{0}|%msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-18([%thread]) %highlight(%-5level) %cyan(%-50(%logger)) -| %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -38,21 +38,34 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${user.dir}/logs/result.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
         </rollingPolicy>
-
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %-18([%thread]) %.-1level|%-40.40logger{0}|%msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-18([%thread]) %highlight(%-5level) %cyan(%-50(%logger)) -| %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="name.auh" level="INFO"/>
+    <appender name="DEBUG_ONLY_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-18([%thread]) %highlight(%-5level) %cyan(%-50(%logger)) -| %msg%n</pattern>
+        </encoder>
+    </appender>
 
-<!--    <logger name="name.auh.tool.PushNewCrawlerFromLastResultRepeater" level="DEBUG"/>-->
+    <!--    debug日志不存储，只在控制台显示-->
+    <logger name="name.auh" level="DEBUG" additivity="false">
+        <appender-ref ref="DEBUG_ONLY_CONSOLE"/>
+    </logger>
+
+    <!-- 有效结果通过warn日志输出-->
+    <logger name="name.auh.tool.ForkModifySearchCrawler" level="WARN">
+        <appender-ref ref="result"/>
+    </logger>
 
     <root level="INFO">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
         <appender-ref ref="error"/>
-        <appender-ref ref="result"/>
     </root>
 
 </configuration>
