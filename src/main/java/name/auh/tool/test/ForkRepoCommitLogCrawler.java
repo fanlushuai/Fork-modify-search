@@ -1,11 +1,11 @@
 package name.auh.tool.test;
 
 import cn.wanghaomiao.seimi.annotation.Crawler;
+import cn.wanghaomiao.seimi.def.BaseSeimiCrawler;
 import cn.wanghaomiao.seimi.http.HttpMethod;
 import cn.wanghaomiao.seimi.struct.Request;
 import cn.wanghaomiao.seimi.struct.Response;
 import lombok.extern.slf4j.Slf4j;
-import name.auh.tool.BaseCrawler;
 import name.auh.tool.seimi.enhance.Util;
 import org.seimicrawler.xpath.JXDocument;
 import org.seimicrawler.xpath.JXNode;
@@ -17,7 +17,12 @@ import java.util.Map;
 
 @Crawler(name = "ForkRepoCommitLog", useUnrepeated = false, useCookie = true, httpTimeOut = 5000)
 @Slf4j
-public class ForkRepoCommitLogCrawler extends BaseCrawler {
+public class ForkRepoCommitLogCrawler extends BaseSeimiCrawler {
+
+    @Override
+    public String[] startUrls() {
+        return new String[0];
+    }
 
     @Override
     public List<Request> startRequests() {

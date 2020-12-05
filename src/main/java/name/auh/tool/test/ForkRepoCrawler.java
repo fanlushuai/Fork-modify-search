@@ -1,9 +1,9 @@
 package name.auh.tool.test;
 
 import cn.wanghaomiao.seimi.annotation.Crawler;
+import cn.wanghaomiao.seimi.def.BaseSeimiCrawler;
 import cn.wanghaomiao.seimi.struct.Response;
 import lombok.extern.slf4j.Slf4j;
-import name.auh.tool.BaseCrawler;
 import org.seimicrawler.xpath.JXDocument;
 import org.springframework.util.StringUtils;
 
@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 @Crawler(name = "ForkRepo", useUnrepeated = false, useCookie = false, httpTimeOut = 5000)
 @Slf4j
-public class ForkRepoCrawler extends BaseCrawler {
+public class ForkRepoCrawler extends BaseSeimiCrawler {
 
     @Override
     public String[] startUrls() {
