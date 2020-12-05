@@ -1,6 +1,5 @@
-package name.auh.tool.hackseimi;
+package name.auh.tool.seimi.hack;
 
-import cn.wanghaomiao.seimi.Constants;
 import cn.wanghaomiao.seimi.config.SeimiConfig;
 import cn.wanghaomiao.seimi.core.SeimiProcessor;
 import cn.wanghaomiao.seimi.def.BaseSeimiCrawler;

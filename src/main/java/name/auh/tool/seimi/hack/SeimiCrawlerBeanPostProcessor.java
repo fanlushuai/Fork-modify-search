@@ -1,4 +1,4 @@
-package name.auh.tool.hackseimi;
+package name.auh.tool.seimi.hack;
 
 import cn.wanghaomiao.seimi.annotation.Crawler;
 import cn.wanghaomiao.seimi.annotation.Interceptor;

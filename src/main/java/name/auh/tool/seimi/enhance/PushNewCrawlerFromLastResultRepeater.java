@@ -1,4 +1,4 @@
-package name.auh.tool;
+package name.auh.tool.seimi.enhance;
 
 import cn.wanghaomiao.seimi.spring.common.CrawlerCache;
 import cn.wanghaomiao.seimi.struct.Request;
@@ -19,9 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class PushNewCrawlerFromLastResultRepeater {
 
-    final static ArrayBlockingQueue<Request> FORK_LIST_RESULT = new ArrayBlockingQueue(1314520);
+    public final static ArrayBlockingQueue<Request> FORK_LIST_RESULT = new ArrayBlockingQueue(1314520);
 
-    final static ArrayBlockingQueue<Request> FORK_REPO_RESULT = new ArrayBlockingQueue(1314520);
+    public final static ArrayBlockingQueue<Request> FORK_REPO_RESULT = new ArrayBlockingQueue(1314520);
 
     private final static AtomicInteger REQUEST_COUNT = new AtomicInteger(0);
 

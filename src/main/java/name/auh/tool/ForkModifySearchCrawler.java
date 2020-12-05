@@ -6,7 +6,9 @@ import cn.wanghaomiao.seimi.http.SeimiHttpType;
 import cn.wanghaomiao.seimi.struct.Request;
 import cn.wanghaomiao.seimi.struct.Response;
 import lombok.extern.slf4j.Slf4j;
-import name.auh.tool.hackseimi.RequestHack;
+import name.auh.tool.seimi.enhance.RateLimitFinder;
+import name.auh.tool.seimi.enhance.Util;
+import name.auh.tool.seimi.hack.RequestHack;
 import org.seimicrawler.xpath.JXDocument;
 import org.seimicrawler.xpath.JXNode;
 import org.springframework.util.StringUtils;
@@ -17,8 +19,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static name.auh.tool.PushNewCrawlerFromLastResultRepeater.FORK_LIST_RESULT;
-import static name.auh.tool.PushNewCrawlerFromLastResultRepeater.FORK_REPO_RESULT;
+import static name.auh.tool.seimi.enhance.PushNewCrawlerFromLastResultRepeater.FORK_LIST_RESULT;
+import static name.auh.tool.seimi.enhance.PushNewCrawlerFromLastResultRepeater.FORK_REPO_RESULT;
 
 @Crawler(name = "ForkModifySearch", httpType = SeimiHttpType.OK_HTTP3, useUnrepeated = false, delay = 1, useCookie = false)
 @Slf4j

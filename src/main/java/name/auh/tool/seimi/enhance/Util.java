@@ -1,4 +1,4 @@
-package name.auh.tool;
+package name.auh.tool.seimi.enhance;
 
 import cn.wanghaomiao.seimi.struct.Response;
 

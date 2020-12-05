@@ -1,4 +1,4 @@
-package name.auh.tool;
+package name.auh.tool.seimi.enhance;
 
 import cn.wanghaomiao.seimi.annotation.Interceptor;
 import cn.wanghaomiao.seimi.core.SeimiInterceptor;
@@ -7,7 +7,7 @@ import cn.wanghaomiao.seimi.struct.Response;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
-import name.auh.tool.hackseimi.RequestHack;
+import name.auh.tool.seimi.hack.RequestHack;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

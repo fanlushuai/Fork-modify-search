@@ -1,10 +1,12 @@
-package name.auh.tool;
+package name.auh.tool.test;
 
 import cn.wanghaomiao.seimi.annotation.Crawler;
 import cn.wanghaomiao.seimi.http.HttpMethod;
 import cn.wanghaomiao.seimi.struct.Request;
 import cn.wanghaomiao.seimi.struct.Response;
 import lombok.extern.slf4j.Slf4j;
+import name.auh.tool.BaseCrawler;
+import name.auh.tool.seimi.enhance.Util;
 import org.seimicrawler.xpath.JXDocument;
 import org.seimicrawler.xpath.JXNode;
 

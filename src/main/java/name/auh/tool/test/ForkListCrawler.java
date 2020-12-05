@@ -1,8 +1,9 @@
-package name.auh.tool;
+package name.auh.tool.test;
 
 import cn.wanghaomiao.seimi.annotation.Crawler;
 import cn.wanghaomiao.seimi.struct.Response;
 import lombok.extern.slf4j.Slf4j;
+import name.auh.tool.BaseCrawler;
 import org.seimicrawler.xpath.JXDocument;
 
 import java.util.List;
