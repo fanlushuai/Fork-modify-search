@@ -55,7 +55,7 @@ public class SeimiCrawlerBootstarpListener implements ApplicationListener<Contex
         }
 
         for (Map.Entry<String, CrawlerModel> crawlerEntry : CrawlerCache.getCrawlerModelContext().entrySet()) {
-            for (int i = 0; i < Constants.BASE_THREAD_NUM * Runtime.getRuntime().availableProcessors(); i++) {
+            for (int i = 0; i < workerNumber; i++) {
                 workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerEntry.getValue()));
             }
         }
