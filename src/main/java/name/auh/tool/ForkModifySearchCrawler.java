@@ -1,6 +1,7 @@
 package name.auh.tool;
 
 import cn.wanghaomiao.seimi.annotation.Crawler;
+import cn.wanghaomiao.seimi.def.BaseSeimiCrawler;
 import cn.wanghaomiao.seimi.http.HttpMethod;
 import cn.wanghaomiao.seimi.http.SeimiHttpType;
 import cn.wanghaomiao.seimi.struct.Request;
@@ -24,7 +25,7 @@ import static name.auh.tool.seimi.enhance.PushNewCrawlerFromLastResultRepeater.F
 
 @Crawler(name = "ForkModifySearch", httpType = SeimiHttpType.OK_HTTP3, useUnrepeated = false, delay = 1, useCookie = false)
 @Slf4j
-public class ForkModifySearchCrawler extends BaseCrawler {
+public class ForkModifySearchCrawler extends BaseSeimiCrawler {
 
     /**
      * 填入你的目标项目  格式： githubUserName/projectName
