@@ -7,6 +7,7 @@ import cn.wanghaomiao.seimi.http.SeimiHttpType;
 import cn.wanghaomiao.seimi.struct.Request;
 import cn.wanghaomiao.seimi.struct.Response;
 import lombok.extern.slf4j.Slf4j;
+import name.auh.tool.seimi.enhance.PriorityRequest;
 import name.auh.tool.seimi.enhance.RateLimitFinder;
 import name.auh.tool.seimi.enhance.Util;
 import name.auh.tool.seimi.hack.RequestHack;
@@ -20,8 +21,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static name.auh.tool.seimi.enhance.PushNewCrawlerFromLastResultRepeater.FORK_LIST_RESULT;
-import static name.auh.tool.seimi.enhance.PushNewCrawlerFromLastResultRepeater.FORK_REPO_RESULT;
+import static name.auh.tool.seimi.enhance.PushNewCrawlerFromLastResultRepeater.CRAWLER_RESULT;
 
 @Crawler(name = "ForkModifySearch", httpType = SeimiHttpType.OK_HTTP3, useUnrepeated = false, delay = 1, useCookie = false)
 @Slf4j
@@ -54,14 +54,15 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
         forkListRepo.forEach(forkRepo -> {
             log.warn("forkRepo--- {}", forkRepo);
 
-            Request request = Request.build(String.format("https://github.com%s", forkRepo), "parseForkRepo");
+            Request request = Request.build(String.format("https://github.com%s", forkRepo), "parseForkRepo").setCrawlerName("ForkModifySearch");
+            ;
             Map<String, Object> meta = new HashMap<>();
             meta.put("forkRepo", forkRepo);
             request.setMeta(meta);
 
             RequestHack.magicHack(request);
 
-            FORK_LIST_RESULT.add(request);
+            CRAWLER_RESULT.add(new PriorityRequest(request, 0));
         });
     }
 
@@ -89,9 +90,9 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
             String forkRepo = (String) Util.getMate(response).get("forkRepo");
 
             Request request = Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
-                    "parseForkRepoCommitLog", HttpMethod.GET, null, meta);
+                    "parseForkRepoCommitLog", HttpMethod.GET, null, meta).setCrawlerName("ForkModifySearch");
             RequestHack.magicHack(request);
-            FORK_REPO_RESULT.add(request);
+            CRAWLER_RESULT.add(new PriorityRequest(request, 1));
         }
 
 

@@ -1,13 +1,12 @@
 package name.auh.tool.seimi.enhance;
 
 import cn.wanghaomiao.seimi.spring.common.CrawlerCache;
-import cn.wanghaomiao.seimi.struct.Request;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Field;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -19,9 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class PushNewCrawlerFromLastResultRepeater {
 
-    public final static ArrayBlockingQueue<Request> FORK_LIST_RESULT = new ArrayBlockingQueue(1314520);
-
-    public final static ArrayBlockingQueue<Request> FORK_REPO_RESULT = new ArrayBlockingQueue(1314520);
+    public final static PriorityBlockingQueue<PriorityRequest> CRAWLER_RESULT = new PriorityBlockingQueue<PriorityRequest>(1314520);
 
     private final static AtomicInteger REQUEST_COUNT = new AtomicInteger(0);
 
@@ -29,7 +26,7 @@ public class PushNewCrawlerFromLastResultRepeater {
      * 总体 抓取请求并发控制
      */
     @Scheduled(fixedDelay = 5000)
-    public void controlRequest() throws IllegalAccessException {
+    public void controlRequest() {
 
         if (RateLimitInterceptor.isRateLimit()) {
             return;
@@ -42,38 +39,33 @@ public class PushNewCrawlerFromLastResultRepeater {
         4. 总之慢慢调整吧，哈哈.奈何用了一个不开窍（有缺陷）的框架
          */
         int oneTimeRequestCount = 50;
-
-        Field[] fields = PushNewCrawlerFromLastResultRepeater.class.getDeclaredFields();
-        for (Field field : fields) {
-            if (!field.getType().equals(ArrayBlockingQueue.class)) {
-                continue;
-            }
-            field.setAccessible(true);
-            ArrayBlockingQueue<Request> arrayBlockingQueue = (ArrayBlockingQueue<Request>) field.get(this);
-            oneTimeRequestCount = pushCrawlerFromLastResultRequestQueue(arrayBlockingQueue, oneTimeRequestCount, "ForkModifySearch");
-            if (oneTimeRequestCount == 0) {
-                return;
-            }
-        }
+        pushCrawlerFromLastResultRequestQueue(oneTimeRequestCount);
     }
 
-    private int pushCrawlerFromLastResultRequestQueue(ArrayBlockingQueue<Request> lastResultRequestQueue, int oneTimePollCount, String crawlerName) {
-        int leftTimes = oneTimePollCount;
+    private void pushCrawlerFromLastResultRequestQueue(int oneTimePollCount) {
         for (int i = 0; i < oneTimePollCount; i++) {
 
             if (RateLimitInterceptor.isRateLimit()) {
                 continue;
             }
 
-            Request request = lastResultRequestQueue.poll();
-            if (request == null) {
-                return leftTimes;
+            PriorityRequest priorityRequest = PushNewCrawlerFromLastResultRepeater.CRAWLER_RESULT.poll();
+            if (priorityRequest == null) {
+                return;
             }
-            CrawlerCache.getCrawlerModel(crawlerName).sendRequest(request);
+
+            if (priorityRequest.getRequest() == null) {
+                log.warn("存在priorityRequest 数据错误 priorityRequest.getRequest() ==null");
+                return;
+            }
+            if (StringUtils.isEmpty(priorityRequest.getRequest().getCrawlerName())) {
+                log.warn("存在priorityRequest 数据错误，StringUtils.isEmpty(priorityRequest.getRequest().getCrawlerName())");
+                return;
+            }
+
+            CrawlerCache.getCrawlerModel(priorityRequest.getRequest().getCrawlerName()).sendRequest(priorityRequest.getRequest());
             log.debug("request Counter # {}", REQUEST_COUNT.incrementAndGet());
-            leftTimes -= 1;
         }
-        return leftTimes;
     }
 
 
