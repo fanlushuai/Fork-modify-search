@@ -27,7 +27,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
     /**
      * 填入你的目标项目  格式： githubUserName/projectName
      */
-    private final static String TARGET_REPO = "pmb6tz/windows-desktop-switcher";
+    private final static String TARGET_REPO = Main.TARGET_REPO;
 
     @Override
     public String[] startUrls() {
