@@ -30,7 +30,7 @@ public class RateLimitInterceptor implements SeimiInterceptor {
      */
     final static Cache<Integer, String> RATE_LIMIT_STOP = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
-    static boolean isRateLimit() {
+    public static boolean isRateLimit() {
         String rateLimitStop = RateLimitInterceptor.RATE_LIMIT_STOP.getIfPresent(1);
         if (Boolean.TRUE.toString().equals(rateLimitStop)) {
             log.debug("found github rate limit ,cancel request push,rateLimitStop {}", rateLimitStop);

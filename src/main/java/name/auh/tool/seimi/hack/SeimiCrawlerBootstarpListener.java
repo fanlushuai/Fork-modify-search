@@ -1,7 +1,6 @@
 package name.auh.tool.seimi.hack;
 
 import cn.wanghaomiao.seimi.config.SeimiConfig;
-import cn.wanghaomiao.seimi.core.SeimiProcessor;
 import cn.wanghaomiao.seimi.def.BaseSeimiCrawler;
 import cn.wanghaomiao.seimi.spring.boot.CrawlerProperties;
 import cn.wanghaomiao.seimi.spring.common.CrawlerCache;
@@ -48,28 +47,35 @@ public class SeimiCrawlerBootstarpListener implements ApplicationListener<Contex
         Map<String, CrawlerModel> crawlerModelContext = CrawlerCache.getCrawlerModelContext();
 
         workersPool = Executors.newFixedThreadPool(workerNumber);
-        for (Class<? extends BaseSeimiCrawler> a : SeimiCrawlerBeanPostProcessor.getCrawlers()) {
-            CrawlerModel crawlerModel = new CrawlerModel(a, context);
-            crawlerModelContext.put(crawlerModel.getCrawlerName(), crawlerModel);
-        }
 
-        for (Map.Entry<String, CrawlerModel> crawlerEntry : CrawlerCache.getCrawlerModelContext().entrySet()) {
-            for (int i = 0; i < workerNumber; i++) {
-                workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerEntry.getValue()));
-            }
-        }
+
 
         String crawlerNames = crawlerProperties.getNames();
         if (StringUtils.isBlank(crawlerNames)) {
             log.info("Spring boot start [{}] as worker.", StringUtils.join(CrawlerCache.getCrawlerModelContext().keySet(), ","));
         } else {
+
             String[] crawlers = crawlerNames.split(",");
             for (String cn : crawlers) {
-                CrawlerModel crawlerModel = CrawlerCache.getCrawlerModel(cn);
-                if (crawlerModel == null) {
-                    log.warn("Crawler name = {} is not existent.", cn);
-                    continue;
+
+
+                for (Class<? extends BaseSeimiCrawler> a : SeimiCrawlerBeanPostProcessor.getCrawlers()) {
+                    CrawlerModel crawlerModel = new CrawlerModel(a, context);
+                    crawlerModelContext.put(crawlerModel.getCrawlerName(), crawlerModel);
                 }
+
+                CrawlerModel crawlerModel = CrawlerCache.getCrawlerModel(cn);
+
+                for (Map.Entry<String, CrawlerModel> crawlerEntry : CrawlerCache.getCrawlerModelContext().entrySet()) {
+                    if(!crawlerEntry.getValue().getCrawlerName().equals(cn)){
+                        continue;
+                    }
+
+                    for (int i = 0; i < workerNumber; i++) {
+                        workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerEntry.getValue()));
+                    }
+                }
+
                 crawlerModel.startRequest();
             }
         }
