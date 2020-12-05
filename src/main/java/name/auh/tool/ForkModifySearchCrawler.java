@@ -6,6 +6,7 @@ import cn.wanghaomiao.seimi.http.SeimiHttpType;
 import cn.wanghaomiao.seimi.struct.Request;
 import cn.wanghaomiao.seimi.struct.Response;
 import lombok.extern.slf4j.Slf4j;
+import name.auh.tool.hackseimi.RequestHack;
 import org.seimicrawler.xpath.JXDocument;
 import org.seimicrawler.xpath.JXNode;
 import org.springframework.util.StringUtils;
@@ -55,7 +56,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
             meta.put("forkRepo", forkRepo);
             request.setMeta(meta);
 
-            RateLimitInterceptor.magicHack(request);
+            RequestHack.magicHack(request);
 
             FORK_LIST_RESULT.add(request);
         });
@@ -86,8 +87,7 @@ public class ForkModifySearchCrawler extends BaseCrawler {
 
             Request request = Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
                     "parseForkRepoCommitLog", HttpMethod.GET, null, meta);
-            RateLimitInterceptor.magicHack(request);
-
+            RequestHack.magicHack(request);
             FORK_REPO_RESULT.add(request);
         }
 

@@ -7,6 +7,7 @@ import cn.wanghaomiao.seimi.struct.Response;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
+import name.auh.tool.hackseimi.RequestHack;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -28,18 +29,6 @@ public class RateLimitInterceptor implements SeimiInterceptor {
             return true;
         }
         return false;
-    }
-
-    /**
-     * 魔法逻辑绕过 底层框架的问题(出错自动重试)会影响到我们自动检测的重新入队。导致重复数据
-     * 绕过的逻辑代码如下：
-     * cn/wanghaomiao/seimi/core/SeimiProcessor.java:90
-     * cn/wanghaomiao/seimi/core/SeimiProcessor.java:124
-     * cn/wanghaomiao/seimi/core/SeimiProcessor.java:128
-     */
-    static void magicHack(Request request) {
-        request.setCurrentReqCount(2);
-        request.setMaxReqCount(0);
     }
 
     @Override
@@ -67,7 +56,7 @@ public class RateLimitInterceptor implements SeimiInterceptor {
 
             log.warn("重新放回队列 {}", request.getUrl());
 
-            RateLimitInterceptor.magicHack(request);
+            RequestHack.magicHack(request);
 
             if ("parseForkRepo".equals(request.getCallBack())) {
                 PushNewCrawlerFromLastResultRepeater.FORK_LIST_RESULT.add(request);
