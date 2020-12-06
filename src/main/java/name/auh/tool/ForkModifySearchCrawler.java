@@ -102,7 +102,7 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
             Request request = Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
                     "parseForkRepoCommitLog", HttpMethod.GET, null, meta).setCrawlerName("ForkModifySearch");
             RequestHack.magicHack(request);
-            CRAWLER_RESULT.add(new PriorityRequest(request, 1));
+            CRAWLER_RESULT.add(new PriorityRequest(request, 10));
         } else {
             log.warn("forkRepo->{}  State>-{}", forkRepo, forkRepoState);
         }
