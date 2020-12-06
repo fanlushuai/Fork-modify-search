@@ -24,7 +24,7 @@ public class RateLimitCheckRunner implements Runnable {
                     Request healthCheckRequest = rateLimitConfig.getHealthCheckRequest();
                     healthCheckRequest.setCallBack("start");
                     healthCheckRequest.setCrawlerName("RateLimit");
-                    log.debug("执行健康检查 url {} ", healthCheckRequest.getUrl());
+                    log.info("执行健康检查 url {} ", healthCheckRequest.getUrl());
                     CrawlerCache.consumeRequest(healthCheckRequest);
                 }
             }

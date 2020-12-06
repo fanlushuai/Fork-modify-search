@@ -43,14 +43,14 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
         parseForkList(response);
     }
 
-    @RateLimitFinder(backToQueue=true)
+    @RateLimitFinder(backToQueue = true)
     public void parseForkList(Response response) {
         JXDocument jxDocument = response.document();
-        if(jxDocument==null){
+        if (jxDocument == null) {
             return;
         }
         List<Object> forkListRepo = jxDocument.sel("//div[@id='network']//div[@class='repo']/a[last()]/@href");
-        if(forkListRepo.isEmpty()){
+        if (forkListRepo.isEmpty()) {
             return;
         }
 
@@ -74,47 +74,44 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
 
     private static final Pattern COMMIT_AHEAD_NUMBER_PATTERN = Pattern.compile("^*(\\d+) commits ahead*");
 
-    @RateLimitFinder(backToQueue=true)
+    @RateLimitFinder(backToQueue = true)
     public void parseForkRepo(Response response) {
         JXDocument jxDocument = response.document();
-        if(jxDocument==null){
+        if (jxDocument == null) {
             return;
         }
-        JXNode jxNode=jxDocument.selNOne("//div[@class='d-flex flex-auto']//text()");
-        if(jxNode==null){
+        JXNode jxNode = jxDocument.selNOne("//div[@class='d-flex flex-auto']//text()");
+        if (jxNode == null) {
             return;
         }
 
         String forkRepoState = jxNode.asString();
-        log.warn("forkRepoState--- {}", forkRepoState);
 
         if (StringUtils.isEmpty(forkRepoState)) {
             return;
         }
-
+        String forkRepo = (String) Util.getMate(response).get("forkRepo");
         Matcher matcher = COMMIT_AHEAD_NUMBER_PATTERN.matcher(forkRepoState);
         if (matcher.find()) {
             Integer commitAheadNumber = Integer.valueOf(matcher.group(1));
-            log.warn("commit ahead number---{} forkRepo --> {}", commitAheadNumber, response.getUrl());
+            log.warn("forkRepo->{}  State>- COMMIT AHEAD NUM [{}] url: {}", forkRepo, commitAheadNumber, response.getRequest().getUrl());
 
             Map<String, Object> meta = new HashMap<>();
             meta.put("commitAheadNumber", commitAheadNumber);
-
-            String forkRepo = (String) Util.getMate(response).get("forkRepo");
 
             Request request = Request.build(String.format("https://github.com/%s/commits/master", forkRepo),
                     "parseForkRepoCommitLog", HttpMethod.GET, null, meta).setCrawlerName("ForkModifySearch");
             RequestHack.magicHack(request);
             CRAWLER_RESULT.add(new PriorityRequest(request, 1));
+        } else {
+            log.warn("forkRepo->{}  State>-{}", forkRepo, forkRepoState);
         }
-
-
     }
 
     @RateLimitFinder
     public void parseForkRepoCommitLog(Response response) {
         JXDocument jxDocument = response.document();
-        if(jxDocument==null){
+        if (jxDocument == null) {
             return;
         }
         List<JXNode> commitLogs = jxDocument.selN("//ol/li//div//text()");
@@ -133,9 +130,72 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
             String commitLog = commitLogs.get(i).asString().trim();
             String commitLogHash = commitLogs.get(i + 5).asString().trim();
             //commitLogHash 存在情况 ep. Update README.md fanlushuai committed May 27, 2019  commitLogHash-->Verified This commit was created on GitHub.com and signed with a verified signature using GitHub’s key. GPG key ID:
-            log.warn("modifyLog [{}]-> {}  logHash-->{}", response.getUrl(), commitLog, commitLogHash.substring(0, commitLogHash.length() > 6 ? 6 : commitLogHash.length()));
+            log.warn("{} modifyLog [{}]-> {}  logHash-->{}", formatGithubCommitTime(commitLog), response.getUrl(), commitLog, commitLogHash.substring(0, commitLogHash.length() > 6 ? 6 : commitLogHash.length()));
         }
 
+    }
+
+    private static final Pattern GITHUB_COMMIT_TIME_REGEX = Pattern.compile("committed ([a-z A-Z]{3}) (\\d{1,2}), (\\d{4})");
+
+    public String formatGithubCommitTime(String commitLog) {
+        if (StringUtils.isEmpty(commitLog)) {
+            return "----年--月--日";
+        }
+
+        Matcher matcher = GITHUB_COMMIT_TIME_REGEX.matcher(commitLog);
+        if (!matcher.find()) {
+            return "----年--月--日";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(matcher.group(3)).append("年");
+        switch (matcher.group(1)) {
+            case "Jan":
+                sb.append(" 1月");
+                break;
+            case "Feb":
+                sb.append(" 2月");
+                break;
+            case "Mar":
+                sb.append(" 3月");
+                break;
+            case "Apr":
+                sb.append(" 4月");
+                break;
+            case "May":
+                sb.append(" 5月");
+                break;
+            case "Jun":
+                sb.append(" 6月");
+                break;
+            case "Jul":
+                sb.append(" 7月");
+                break;
+            case "Aug":
+                sb.append(" 8月");
+                break;
+            case "Sep":
+                sb.append(" 9月");
+                break;
+            case "Oct":
+                sb.append("10月");
+                break;
+            case "Nov":
+                sb.append("11月");
+                break;
+            case "Dec":
+                sb.append("12月");
+                break;
+            default:
+                sb.append(matcher.group(1));
+        }
+        String dayStr = matcher.group(2);
+        if (dayStr.length() == 1) {
+            sb.append(" ");
+        }
+        sb.append(dayStr).append("日");
+
+        return sb.toString();
     }
 
 }

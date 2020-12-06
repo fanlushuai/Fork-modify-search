@@ -29,17 +29,12 @@ public class RateLimitInterceptor implements SeimiInterceptor {
     final static Cache<Integer, String> RATE_LIMIT_STOP = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
     public static boolean isRateLimit() {
-        String rateLimitStop = RateLimitInterceptor.RATE_LIMIT_STOP.getIfPresent(1);
-        if (Boolean.TRUE.toString().equals(rateLimitStop)) {
-            return true;
-        }
-        return false;
+        return Boolean.TRUE.toString().equals(RateLimitInterceptor.RATE_LIMIT_STOP.getIfPresent(1));
     }
 
     @Override
     public Class<? extends Annotation> getTargetAnnotationClass() {
         return null;
-//        return RateLimitFinder.class;
     }
 
     @Override
@@ -85,7 +80,7 @@ public class RateLimitInterceptor implements SeimiInterceptor {
                 CRAWLER_RESULT.add(new PriorityRequest(request));
             }
         } else {
-            if (rateLimitFinder.isHealthCheckUrl()) {
+            if (rateLimitFinder.isHealthCheckUrl() && isRateLimit()) {
                 RateLimitInterceptor.RATE_LIMIT_STOP.put(1, Boolean.FALSE.toString());
                 log.warn("健康检查发现没问题，开启生产者和消费者的运行开关");
             }

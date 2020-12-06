@@ -53,9 +53,9 @@
     </appender>
 
     <!--    debug日志不存储，只在控制台显示-->
-    <logger name="name.auh" level="DEBUG" additivity="false">
-        <appender-ref ref="DEBUG_ONLY_CONSOLE"/>
-    </logger>
+<!--    <logger name="name.auh" level="DEBUG" additivity="false">-->
+<!--        <appender-ref ref="DEBUG_ONLY_CONSOLE"/>-->
+<!--    </logger>-->
 
     <!-- 有效结果通过warn日志输出-->
     <logger name="name.auh.tool.ForkModifySearchCrawler" level="WARN">
