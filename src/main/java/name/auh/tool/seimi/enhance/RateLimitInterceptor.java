@@ -8,11 +8,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import name.auh.tool.seimi.hack.RequestHack;
-import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +31,6 @@ public class RateLimitInterceptor implements SeimiInterceptor {
     public static boolean isRateLimit() {
         String rateLimitStop = RateLimitInterceptor.RATE_LIMIT_STOP.getIfPresent(1);
         if (Boolean.TRUE.toString().equals(rateLimitStop)) {
-            log.debug("found github rate limit ,cancel request push,rateLimitStop {}", rateLimitStop);
             return true;
         }
         return false;
@@ -41,7 +38,8 @@ public class RateLimitInterceptor implements SeimiInterceptor {
 
     @Override
     public Class<? extends Annotation> getTargetAnnotationClass() {
-        return RateLimitFinder.class;
+        return null;
+//        return RateLimitFinder.class;
     }
 
     @Override
@@ -56,49 +54,40 @@ public class RateLimitInterceptor implements SeimiInterceptor {
             return;
         }
 
-        if (rateLimitFounds == null) {
-            rateLimitFounds = new HashSet<>();
+        Set<RateLimitConfig> rateLimitConfigs = RateLimitBoot.getRateLimitConfigs();
 
-            //保证就算类被拷贝走也不用修改直接用
-            String[] splitPackageName = RateLimitInterceptor.class.getPackage().getName().split(".");
-            StringBuffer reflectPackageName = new StringBuffer();
-            for (int i = 0; i < splitPackageName.length; i++) {
-                String s = splitPackageName[i];
-                reflectPackageName.append(s);
-                if (i == 1) {
-                    break;
-                }
-            }
-
-            Reflections reflections = new Reflections(reflectPackageName.toString());
-            Set<Class<? extends RateLimitFound>> rateLimitFoundsClass = reflections.getSubTypesOf(RateLimitFound.class);
-            for (Class<? extends RateLimitFound> rateLimitFound : rateLimitFoundsClass) {
-                try {
-                    rateLimitFounds.add(rateLimitFound.newInstance());
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+        boolean limited = false;
+        for (RateLimitConfig rateLimitFound : rateLimitConfigs) {
+            if (rateLimitFound.found(response)) {
+                limited = true;
+                break;
             }
         }
 
-        for (RateLimitFound rateLimitFound : rateLimitFounds) {
-            if (rateLimitFound.found(response)) {
-                Request request = response.getRequest();
+        RateLimitFinder rateLimitFinder = method.getDeclaredAnnotation(RateLimitFinder.class);
+        if (rateLimitFinder == null) {
+            return;
+        }
 
-                log.error("被墙了，自动|降低频率！！！ 检测链接", request.getUrl());
+        if (limited) {
+            Request request = response.getRequest();
 
-                RATE_LIMIT_STOP.put(1, Boolean.TRUE.toString());
+            log.error("已消费请求，收到被强，检测链接", request.getUrl());
 
+            RATE_LIMIT_STOP.put(1, Boolean.TRUE.toString());
+
+            if (rateLimitFinder.backToQueue()) {
                 log.warn("重新放回队列 {}", request.getUrl());
 
                 RequestHack.magicHack(request);
 
                 //被强之后，会被重新放回队列，但是自定义优先级丢失
                 CRAWLER_RESULT.add(new PriorityRequest(request));
-
-                return;
+            }
+        } else {
+            if (rateLimitFinder.isHealthCheckUrl()) {
+                RateLimitInterceptor.RATE_LIMIT_STOP.put(1, Boolean.FALSE.toString());
+                log.warn("健康检查发现没问题，开启生产者和消费者的运行开关");
             }
         }
 
@@ -109,10 +98,4 @@ public class RateLimitInterceptor implements SeimiInterceptor {
 
     }
 
-    private static Set<RateLimitFound> rateLimitFounds = null;
-
-    public interface RateLimitFound {
-
-        boolean found(Response response);
-    }
 }

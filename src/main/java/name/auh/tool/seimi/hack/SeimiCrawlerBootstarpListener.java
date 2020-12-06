@@ -6,6 +6,7 @@ import cn.wanghaomiao.seimi.spring.boot.CrawlerProperties;
 import cn.wanghaomiao.seimi.spring.common.CrawlerCache;
 import cn.wanghaomiao.seimi.struct.CrawlerModel;
 import lombok.extern.slf4j.Slf4j;
+import name.auh.tool.seimi.enhance.RateLimitBoot;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -36,6 +37,7 @@ public class SeimiCrawlerBootstarpListener implements ApplicationListener<Contex
             return;
         }
         CrawlerProperties crawlerProperties = context.getBean(CrawlerProperties.class);
+        RateLimitBoot rateLimitBoot = context.getBean(RateLimitBoot.class);
 
         /*
          * 如果想要让框架受到我们的控制， seimi.crawler.enabled参数不要设置为true。设置成false或者不设置都行
@@ -48,8 +50,6 @@ public class SeimiCrawlerBootstarpListener implements ApplicationListener<Contex
 
         workersPool = Executors.newFixedThreadPool(workerNumber);
 
-
-
         String crawlerNames = crawlerProperties.getNames();
         if (StringUtils.isBlank(crawlerNames)) {
             log.info("Spring boot start [{}] as worker.", StringUtils.join(CrawlerCache.getCrawlerModelContext().keySet(), ","));
@@ -57,7 +57,6 @@ public class SeimiCrawlerBootstarpListener implements ApplicationListener<Contex
 
             String[] crawlers = crawlerNames.split(",");
             for (String cn : crawlers) {
-
 
                 for (Class<? extends BaseSeimiCrawler> a : SeimiCrawlerBeanPostProcessor.getCrawlers()) {
                     CrawlerModel crawlerModel = new CrawlerModel(a, context);
@@ -67,7 +66,12 @@ public class SeimiCrawlerBootstarpListener implements ApplicationListener<Contex
                 CrawlerModel crawlerModel = CrawlerCache.getCrawlerModel(cn);
 
                 for (Map.Entry<String, CrawlerModel> crawlerEntry : CrawlerCache.getCrawlerModelContext().entrySet()) {
-                    if(!crawlerEntry.getValue().getCrawlerName().equals(cn)){
+                    if ("RateLimit".equals(crawlerEntry.getValue().getCrawlerName())) {
+                        workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerEntry.getValue()));
+                        continue;
+                    }
+
+                    if (!crawlerEntry.getValue().getCrawlerName().equals(cn)) {
                         continue;
                     }
 

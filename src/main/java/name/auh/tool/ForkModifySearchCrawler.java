@@ -43,7 +43,7 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
         parseForkList(response);
     }
 
-    @RateLimitFinder
+    @RateLimitFinder(backToQueue=true)
     public void parseForkList(Response response) {
         JXDocument jxDocument = response.document();
         List<Object> forkListRepo = jxDocument.sel("//div[@id='network']//div[@class='repo']/a[last()]/@href");
@@ -68,7 +68,7 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
 
     private static final Pattern COMMIT_AHEAD_NUMBER_PATTERN = Pattern.compile("^*(\\d+) commits ahead*");
 
-    @RateLimitFinder
+    @RateLimitFinder(backToQueue=true)
     public void parseForkRepo(Response response) {
         JXDocument jxDocument = response.document();
 

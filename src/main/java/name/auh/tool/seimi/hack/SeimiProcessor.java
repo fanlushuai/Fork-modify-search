@@ -70,7 +70,7 @@ public class SeimiProcessor implements Runnable {
         while (true) {
             if (RateLimitInterceptor.isRateLimit()) {
                 try {
-                    logger.debug("收到被强消息，thread-{} 继续sleep 2s", Thread.currentThread().getName());
+                    logger.debug("消费者，收到。sleep中", Thread.currentThread().getName());
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
