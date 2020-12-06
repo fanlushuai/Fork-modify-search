@@ -11,10 +11,7 @@ public class GithubRateLimitConfig implements RateLimitConfig {
 
     @Override
     public boolean found(Response response) {
-        if (response == null || StringUtils.isEmpty(response.getContent())) {
-            return false;
-        }
-        return response.getContent().contains("Rate limit");
+        return response==null ||StringUtils.isEmpty(response.getContent()) || response.getContent().contains("Rate limit");
     }
 
     @Override

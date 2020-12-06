@@ -11,6 +11,6 @@ public class Main {
      * 2. 启动项目（spirng boot启动）
      * 3. logs目录查看result.log文件，获得结果
      */
-    public final static String TARGET_REPO = "braisdom/ObjectiveSql";
+    public final static String TARGET_REPO = "tychxn/jd-assistant";
 
 }

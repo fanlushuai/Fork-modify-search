@@ -5,7 +5,7 @@ import cn.wanghaomiao.seimi.def.BaseSeimiCrawler;
 import cn.wanghaomiao.seimi.struct.Response;
 import lombok.extern.slf4j.Slf4j;
 
-@Crawler(name = "RateLimit", useUnrepeated = false, delay = 1, useCookie = false, httpTimeOut = 5000)
+@Crawler(name = "RateLimit", useUnrepeated = false, delay = 1, useCookie = false, httpTimeOut = 15000)
 @Slf4j
 public class RateLimitCrawler extends BaseSeimiCrawler {
 

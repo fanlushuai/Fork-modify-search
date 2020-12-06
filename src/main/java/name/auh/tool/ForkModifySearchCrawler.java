@@ -46,6 +46,9 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
     @RateLimitFinder(backToQueue=true)
     public void parseForkList(Response response) {
         JXDocument jxDocument = response.document();
+        if(jxDocument==null){
+            return;
+        }
         List<Object> forkListRepo = jxDocument.sel("//div[@id='network']//div[@class='repo']/a[last()]/@href");
 
         //移除第一个选取，这个是fork源的名称
@@ -71,6 +74,9 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
     @RateLimitFinder(backToQueue=true)
     public void parseForkRepo(Response response) {
         JXDocument jxDocument = response.document();
+        if(jxDocument==null){
+            return;
+        }
 
         String forkRepoState = jxDocument.selNOne("//div[@class='d-flex flex-auto']//text()").asString();
         log.warn("forkRepoState--- {}", forkRepoState);
@@ -101,6 +107,9 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
     @RateLimitFinder
     public void parseForkRepoCommitLog(Response response) {
         JXDocument jxDocument = response.document();
+        if(jxDocument==null){
+            return;
+        }
         List<JXNode> commitLogs = jxDocument.selN("//ol/li//div//text()");
         if (commitLogs.isEmpty()) {
             return;
