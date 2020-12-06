@@ -50,6 +50,9 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
             return;
         }
         List<Object> forkListRepo = jxDocument.sel("//div[@id='network']//div[@class='repo']/a[last()]/@href");
+        if(forkListRepo.isEmpty()){
+            return;
+        }
 
         //移除第一个选取，这个是fork源的名称
         forkListRepo.remove(0);
@@ -77,8 +80,12 @@ public class ForkModifySearchCrawler extends BaseSeimiCrawler {
         if(jxDocument==null){
             return;
         }
+        JXNode jxNode=jxDocument.selNOne("//div[@class='d-flex flex-auto']//text()");
+        if(jxNode==null){
+            return;
+        }
 
-        String forkRepoState = jxDocument.selNOne("//div[@class='d-flex flex-auto']//text()").asString();
+        String forkRepoState = jxNode.asString();
         log.warn("forkRepoState--- {}", forkRepoState);
 
         if (StringUtils.isEmpty(forkRepoState)) {
