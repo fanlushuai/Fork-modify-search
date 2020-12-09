@@ -6,7 +6,6 @@ import cn.wanghaomiao.seimi.spring.boot.CrawlerProperties;
 import cn.wanghaomiao.seimi.spring.common.CrawlerCache;
 import cn.wanghaomiao.seimi.struct.CrawlerModel;
 import lombok.extern.slf4j.Slf4j;
-import name.auh.tool.seimi.enhance.RateLimitBoot;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -37,7 +36,6 @@ public class SeimiCrawlerBootstarpListener implements ApplicationListener<Contex
             return;
         }
         CrawlerProperties crawlerProperties = context.getBean(CrawlerProperties.class);
-        RateLimitBoot rateLimitBoot = context.getBean(RateLimitBoot.class);
 
         /*
          * 如果想要让框架受到我们的控制， seimi.crawler.enabled参数不要设置为true。设置成false或者不设置都行
@@ -65,24 +63,31 @@ public class SeimiCrawlerBootstarpListener implements ApplicationListener<Contex
 
                 CrawlerModel crawlerModel = CrawlerCache.getCrawlerModel(cn);
 
-                for (Map.Entry<String, CrawlerModel> crawlerEntry : CrawlerCache.getCrawlerModelContext().entrySet()) {
-                    if ("RateLimit".equals(crawlerEntry.getValue().getCrawlerName())) {
-                        workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerEntry.getValue()));
-                        continue;
-                    }
+                //获取代理的任务
+                if ("ProxyGet".equals(cn)) {
+                    workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerModel));
+                    //todo 触发定时器，去定期获取代理地址
+                    crawlerModel.startRequest();
+                    continue;
+                }
 
-                    if (!crawlerEntry.getValue().getCrawlerName().equals(cn)) {
-                        continue;
-                    }
+                //健康检查任务。配合限速工作的任务
+                if ("RateLimit".equals(cn)) {
+                    workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerModel));
+                    //todo 触发定时器，去操作健康检查
 
-                    for (int i = 0; i < workerNumber; i++) {
-                        workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerEntry.getValue()));
-                    }
+                    continue;
+                }
+
+                //普通任务直接按照这种规则
+                for (int i = 0; i < workerNumber; i++) {
+                    workersPool.execute(new SeimiProcessor(SeimiCrawlerBeanPostProcessor.getInterceptors(), crawlerModel));
                 }
 
                 crawlerModel.startRequest();
             }
         }
+
         //统一通用配置信息至 seimiConfig
         SeimiConfig config = new SeimiConfig();
         config.setBloomFilterExpectedInsertions(crawlerProperties.getBloomFilterExpectedInsertions());

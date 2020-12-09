@@ -11,8 +11,11 @@ import name.auh.tool.seimi.enhance.PriorityRequest;
 import name.auh.tool.seimi.enhance.RateLimitFinder;
 import name.auh.tool.seimi.enhance.Util;
 import name.auh.tool.seimi.hack.RequestHack;
+import name.auh.tool.seimi.proxy.example.XXXHttpProxyPool;
+import name.auh.tool.seimi.proxy.example.XXXProxy;
 import org.seimicrawler.xpath.JXDocument;
 import org.seimicrawler.xpath.JXNode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
@@ -26,6 +29,18 @@ import static name.auh.tool.seimi.enhance.PushNewCrawlerFromLastResultRepeater.C
 @Crawler(name = "ForkModifySearch", httpType = SeimiHttpType.OK_HTTP3, useUnrepeated = false, delay = 1, useCookie = false)
 @Slf4j
 public class ForkModifySearchCrawler extends BaseSeimiCrawler {
+
+    @Autowired
+    XXXHttpProxyPool xxxHttpProxyPool;
+
+    /**
+     * 每个请求使用不同代理
+     */
+//    @Override
+//    public String proxy() {
+//        XXXProxy proxy = xxxHttpProxyPool.get();
+//        return proxy.getIp() + ":" + proxy.getPort();
+//    }
 
     /**
      * 填入你的目标项目  格式： githubUserName/projectName

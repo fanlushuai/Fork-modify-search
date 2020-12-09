@@ -1,5 +1,5 @@
 seimi:
   crawler:
-    names: ForkModifySearch
+    names: ProxyGet
 #    注意，想要自定义控制seimi的worker数量。必须enabled设置为false
     enabled: false
